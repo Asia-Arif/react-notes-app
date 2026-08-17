@@ -58,7 +58,7 @@ const CreateNote = () => {
         try {
 
             const response = await fetch(
-                "${BASE_URL}/api/notes",
+                `${BASE_URL}/api/notes`,
                 {
                     method: "POST",
 
