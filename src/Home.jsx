@@ -1,26 +1,126 @@
 import Header from "./components/Header";
 import Navbar from "./components/Navbar";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BASE_URL } from "./lib/config";
 
 const Home = () => {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-    const [notes] = useState(
-        JSON.parse(localStorage.getItem("notes")) || []
-    );
+
+    const [notes, setNotes] = useState([]);
+
+    const [filter, setFilter] = useState("");
+
+    const [sortBy, setSortBy] = useState("default");
+
+
+    // GET NOTES FROM BACKEND
+    useEffect(() => {
+
+        const getNotes = async () => {
+
+            try {
+
+                const response = await fetch(
+                    `${BASE_URL}/api/notes`
+                );
+
+
+                const data = await response.json();
+
+
+                if (!response.ok) {
+
+                    console.log(data.message);
+                    return;
+
+                }
+
+
+                setNotes(data);
+
+
+            } catch (error) {
+
+                console.log("Error:", error);
+
+            }
+
+        };
+
+
+        getNotes();
+
+    }, []);
+
 
     const createNote = () => {
-        navigate('/create')
+
+        navigate("/create");
+
     };
 
+
+    const openNote = (id) => {
+
+        navigate(`/create?id=${id}`);
+
+    };
+
+
+    const filteredNotes = notes.filter((note) =>
+
+        note.title.toLowerCase().includes(
+            filter.toLowerCase()
+        ) ||  note.body.toLowerCase().includes(
+            filter.toLowerCase()
+        )
+
+    );
+
+
+    const sortedNotes = [...filteredNotes].sort((a, b) => {
+
+        if (sortBy === "alphabets") {
+
+            return a.title.localeCompare(b.title);
+
+        }
+
+
+        if (sortBy === "edited") {
+
+            return b.updatedAt - a.updatedAt;
+
+        }
+
+
+        if (sortBy === "created") {
+
+            return b.createdAt - a.createdAt;
+
+        }
+
+
+        return 0;
+
+    });
+
+
     return (
+
         <div>
 
             <Header />
+            <Navbar
+                filter={filter}
+                setFilter={setFilter}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+            />
 
-            <Navbar />
 
             <button
                 onClick={createNote}
@@ -28,26 +128,25 @@ const Home = () => {
             >
                 Create New Note
             </button>
-
             <div className="flex flex-col justify-center items-center mt-[30px] px-[10px]">
 
-                {notes.map((note) => (
-
+                {sortedNotes.map((note) => (
                     <div
                         key={note.id}
+                        onClick={() => openNote(note.id)}
                         className="bg-[#F7F7F7] p-5 mb-4 rounded-[5px] max-w-[700px] w-full cursor-pointer"
                     >
 
-                        <p className="text-[20px] ">
+                        <p className="text-[20px]">
                             {note.title}
                         </p>
-
                         <p className="mt-2">
                             {note.body}
                         </p>
-
                         <p className="mt-2 text-sm text-gray-500">
-                            {new Date(note.createdAt).toLocaleTimeString(
+                            {new Date(
+                                note.createdAt
+                            ).toLocaleTimeString(
                                 "en-US",
                                 {
                                     year: "numeric",

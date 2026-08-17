@@ -12,15 +12,8 @@ import {
 function App() {
     return (
         <Routes>
-
-
-
-                    <Route exact path="/" element={<Home />} />
-
-                    <Route path="/create" element={CreateNote} />
-
-
-
+            <Route exact path="/" element={<Home />} />
+            <Route path="/create" element={<CreateNote />} />
         </Routes>
     );
 }
