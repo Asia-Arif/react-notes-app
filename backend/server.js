@@ -1,98 +1,136 @@
+import "dotenv/config"; 
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
+import Note from "./models/Note.js";
 
 const app = express();
 
 const PORT = 5000;
 
+//connection
+const MONGO_URI = process.env.MONGO_URI;
+mongoose.connect(MONGO_URI)
+    .then(() => {
+        console.log("Connected to MongoDB");
+    })
+    .catch((error) => {
+        console.error("MongoDB connection failed:", error);
+    });
+
 app.use(cors());
 app.use(express.json());
-let notes = [];
+
 
 //get notes 
-app.get("/api/notes", (req, res) => {
-    res.json(notes);
-});
+app.get("/api/notes", async (req, res) => {
+    try {
+        const notes = await Note.find();
 
-// GET single note
-app.get("/api/notes/:id", (req, res) => {
-    const note = notes.find((note) => note.id === req.params.id);
-
-    if (!note) {
-        return res.status(404).json({
-            message: "Note not found"
+        res.json(notes);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
         });
     }
-
-    res.json(note);
+});
+// GET single note
+app.get("/api/notes/:id", async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.id);
+        if (!note) {
+            return res.status(404).json({
+                message: "Note not found"
+            });
+        }
+        res.json(note);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
 });
 
 // CREATE a new note
-app.post("/api/notes", (req, res) => {
-    const { title, body } = req.body;
+app.post("/api/notes", async (req, res) => {
+    try {
+        const { title, body } = req.body;
 
-    if (!title || !body) {
-        return res.status(400).json({
-            message: "Title and body are required"
+        if (!title || !body) {
+            return res.status(400).json({
+                message: "Title and body are required"
+            });
+        }
+
+        const newNote = new Note({
+            title,
+            body
+        });
+
+        const savedNote = await newNote.save();
+
+        res.status(201).json(savedNote);
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
         });
     }
-
-    const newNote = {
-        id: crypto.randomUUID(),
-        title,
-        body,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-    };
-
-    notes.push(newNote);
-
-    res.status(201).json(newNote);
 });
 
 // Edit notes using PUT
-app.put("/api/notes/:id", (req, res) => {
-    const { title, body } = req.body;
+app.put("/api/notes/:id", async (req, res) => {
+    try {
+        const { title, body } = req.body;
 
-    const noteIndex = notes.findIndex(
-        (note) => note.id === req.params.id
-    );
+        const updatedNote = await Note.findByIdAndUpdate(
+            req.params.id,
+            {
+                title,
+                body
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
 
-    if (noteIndex === -1) {
-        return res.status(404).json({
-            message: "Note not found"
+        if (!updatedNote) {
+            return res.status(404).json({
+                message: "Note not found"
+            });
+        }
+
+        res.json(updatedNote);
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
         });
     }
-
-    notes[noteIndex] = {
-        ...notes[noteIndex],
-        title,
-        body,
-        updatedAt: Date.now()
-    };
-
-    res.json(notes[noteIndex]);
 });
 
 // DELETE a note
-app.delete("/api/notes/:id", (req, res) => {
-    const noteExists = notes.some(
-        (note) => note.id === req.params.id
-    );
+app.delete("/api/notes/:id", async (req, res) => {
+    try {
+        const deletedNote = await Note.findByIdAndDelete(
+            req.params.id
+        );
+        if (!deletedNote) {
+            return res.status(404).json({
+                message: "Note not found"
+            });
+        }
 
-    if (!noteExists) {
-        return res.status(404).json({
-            message: "Note not found"
+        res.json({
+            message: "Note deleted successfully"
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
         });
     }
-
-    notes = notes.filter(
-        (note) => note.id !== req.params.id
-    );
-
-    res.json({
-        message: "Note deleted successfully"
-    });
 });
 
 
@@ -102,4 +140,8 @@ app.delete("/api/notes/:id", (req, res) => {
 // });
 
 // uncomment the export
-module.exports = app;
+// module.exports = app;
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});

@@ -8,16 +8,19 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server" : "node ./backend/server.js",
-    "dev:server" : "nodemon ./backend/server.js"
+    "server": "node ./backend/server.js",
+    "dev:server": "nodemon ./backend/server.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "mongoose": "^9.9.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
+    "sweetalert2": "^11.26.25",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

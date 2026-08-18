@@ -2,6 +2,7 @@ import Header from "./components/Header";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "./lib/config";
+import Swal from "sweetalert2";
 
 const CreateNote = () => {
 
@@ -149,50 +150,61 @@ const CreateNote = () => {
     // delte notes 
     const deleteNote = async () => {
 
-        const confirmDelete = window.confirm(
-            "You want to delete this note?"
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You want to delete this note?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `${BASE_URL}/api/notes/${noteId}`,
+            {
+                method: "DELETE"
+            }
         );
 
+        const data = await response.json();
 
-        if (!confirmDelete) {
+        if (!response.ok) {
+
+            Swal.fire({
+                title: "Error!",
+                text: data.message,
+                icon: "error"
+            });
+
             return;
         }
 
+        await Swal.fire({
+            title: "Deleted!",
+            text: "Your note has been deleted.",
+            icon: "success"
+        });
 
-        try {
+        navigate("/");
 
-            const response = await fetch(
-                `${BASE_URL}/api/notes/${noteId}`,
-                {
-                    method: "DELETE"
-                }
-            );
+    } catch (error) {
 
+        console.log("Error:", error);
 
-            const data = await response.json();
+        Swal.fire({
+            title: "Error!",
+            text: "Something went wrong.",
+            icon: "error"
+        });
 
-
-            if (!response.ok) {
-
-                alert(data.message);
-                return;
-
-            }
-
-
-            console.log("Note deleted:", data);
-
-            navigate("/");
-
-
-        } catch (error) {
-
-            console.log("Error:", error);
-
-        }
-
-    };
-
+    }
+};
 
     return (
         <div>

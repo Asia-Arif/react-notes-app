@@ -15,6 +15,8 @@ const Home = () => {
 
     const [sortBy, setSortBy] = useState("default");
 
+  
+
 
     // GET NOTES FROM BACKEND
     useEffect(() => {
@@ -69,44 +71,76 @@ const Home = () => {
 
     };
 
+    // useEffect(() => {
 
-    const filteredNotes = notes.filter((note) =>
+    //     if(filter.trim() === '') return;
 
-        note.title.toLowerCase().includes(
-            filter.toLowerCase()
-        ) ||  note.body.toLowerCase().includes(
-            filter.toLowerCase()
-        )
+    //     const filteredNotes = notes.filter((note) =>
 
-    );
+    //         note.title.toLowerCase().includes(
+    //             filter.toLowerCase()
+    //         ) || note.body.toLowerCase().includes(
+    //             filter.toLowerCase()
+    //         )
 
+    //     );
+    //     setNotes(filteredNotes)
+    // }, [filter])
 
-    const sortedNotes = [...filteredNotes].sort((a, b) => {
+    
 
-        if (sortBy === "alphabets") {
+    // useEffect(() => {
+    //     console.log(sortBy)
+    //     const sortedNotes = [...notes].sort((a, b) => {
+            
+    //         if (sortBy === "alphabets") {
 
-            return a.title.localeCompare(b.title);
+    //             return a.title.localeCompare(b.title);
 
-        }
-
-
-        if (sortBy === "edited") {
-
-            return b.updatedAt - a.updatedAt;
-
-        }
-
-
-        if (sortBy === "created") {
-
-            return b.createdAt - a.createdAt;
-
-        }
+    //         }
 
 
-        return 0;
+    //         if (sortBy === "edited") {
 
-    });
+    //             return b.updatedAt - a.updatedAt;
+
+    //         }
+
+
+
+    //         return b.createdAt - a.createdAt;
+
+
+    //     });
+
+    //     setNotes(sortedNotes)
+    // }, [sortBy])
+
+
+
+
+
+const displayNotes = [...notes]
+    .filter((note) =>
+        note.title.toLowerCase().includes(filter.toLowerCase()) ||
+        note.body.toLowerCase().includes(filter.toLowerCase())
+    )
+   .sort((a, b) => {
+
+    if (sortBy === "alphabets") {
+        return a.title.localeCompare(b.title);
+    }
+
+    if (sortBy === "edited") {
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+    }
+
+    if (sortBy === "created") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+
+    return 0;
+});
 
 
     return (
@@ -130,10 +164,10 @@ const Home = () => {
             </button>
             <div className="flex flex-col justify-center items-center mt-[30px] px-[10px]">
 
-                {sortedNotes.map((note) => (
+                {displayNotes.map((note) => (
                     <div
-                        key={note.id}
-                        onClick={() => openNote(note.id)}
+                        key={note._id}
+                        onClick={() => openNote(note._id)}
                         className="bg-[#F7F7F7] p-5 mb-4 rounded-[5px] max-w-[700px] w-full cursor-pointer"
                     >
 
