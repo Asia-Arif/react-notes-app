@@ -1,7 +1,7 @@
-import Header from "./components/Header";
+import Header from "../components/Header";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { BASE_URL } from "./lib/config";
+import { BASE_URL } from "../lib/config";
 import Swal from "sweetalert2";
 
 const CreateNote = () => {
@@ -26,7 +26,12 @@ const CreateNote = () => {
                 try {
 
                     const response = await fetch(
-                        `${BASE_URL}/api/notes/${noteId}`
+                        `${BASE_URL}/api/notes/${noteId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${localStorage.getItem("token")}`
+                            }
+                        }
                     );
 
                     const data = await response.json();
@@ -64,7 +69,8 @@ const CreateNote = () => {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
                     },
 
                     body: JSON.stringify({
@@ -88,7 +94,7 @@ const CreateNote = () => {
 
             console.log("Note added:", data);
 
-            navigate("/");
+            navigate("/notes");
 
 
         } catch (error) {
@@ -111,7 +117,8 @@ const CreateNote = () => {
                     method: "PUT",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
                     },
 
                     body: JSON.stringify({
@@ -121,9 +128,7 @@ const CreateNote = () => {
                 }
             );
 
-
             const data = await response.json();
-
 
             if (!response.ok) {
 
@@ -132,11 +137,9 @@ const CreateNote = () => {
 
             }
 
-
             console.log("Note updated:", data);
 
-            navigate("/");
-
+            navigate("/notes");
 
         } catch (error) {
 
@@ -150,73 +153,78 @@ const CreateNote = () => {
     // delte notes 
     const deleteNote = async () => {
 
-    const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "You want to delete this note?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel"
-    });
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this note?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+        });
 
-    if (!result.isConfirmed) {
-        return;
-    }
-
-    try {
-
-        const response = await fetch(
-            `${BASE_URL}/api/notes/${noteId}`,
-            {
-                method: "DELETE"
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-
-            Swal.fire({
-                title: "Error!",
-                text: data.message,
-                icon: "error"
-            });
-
+        if (!result.isConfirmed) {
             return;
         }
 
-        await Swal.fire({
-            title: "Deleted!",
-            text: "Your note has been deleted.",
-            icon: "success"
-        });
+        try {
 
-        navigate("/");
+            const response = await fetch(
+                `${BASE_URL}/api/notes/${noteId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    },
 
-    } catch (error) {
+                }
+            );
 
-        console.log("Error:", error);
+            const data = await response.json();
 
-        Swal.fire({
-            title: "Error!",
-            text: "Something went wrong.",
-            icon: "error"
-        });
+            if (!response.ok) {
 
-    }
-};
+                Swal.fire({
+                    title: "Error!",
+                    text: data.message,
+                    icon: "error"
+                });
+
+                return;
+            }
+
+            await Swal.fire({
+                title: "Deleted!",
+                text: "Your note has been deleted.",
+                icon: "success"
+            });
+
+            navigate("/notes");
+
+        } catch (error) {
+
+            console.log("Error:", error);
+
+            Swal.fire({
+                title: "Error!",
+                text: "Something went wrong.",
+                icon: "error"
+            });
+
+        }
+    };
 
     return (
         <div>
 
-            <Header />
+
 
 
             <nav className="text-[18px] bg-[#F7F7F7] py-4">
 
                 <div className="max-w-[700px] w-full mx-auto hover:text-[#437993]">
 
-                    <Link to="/">
+                    <Link to="/notes">
                         Home
                     </Link>
 

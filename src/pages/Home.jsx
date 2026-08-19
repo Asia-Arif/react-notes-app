@@ -1,8 +1,8 @@
-import Header from "./components/Header";
-import Navbar from "./components/Navbar";
+import Header from "../components/Header";
+import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { BASE_URL } from "./lib/config";
+import { BASE_URL } from "../lib/config";
 
 const Home = () => {
 
@@ -15,47 +15,59 @@ const Home = () => {
 
     const [sortBy, setSortBy] = useState("default");
 
-  
+
 
 
     // GET NOTES FROM BACKEND
-    useEffect(() => {
+  useEffect(() => {
 
-        const getNotes = async () => {
+    const getNotes = async () => {
 
-            try {
+        const token = localStorage.getItem("token");
 
-                const response = await fetch(
-                    `${BASE_URL}/api/notes`
-                );
+        if (!token) {
+            navigate("/");
+            return;
+        }
 
+        try {
 
-                const data = await response.json();
+            const response = await fetch(
+                `${BASE_URL}/api/notes`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
 
+            const data = await response.json();
 
-                if (!response.ok) {
+            if (!response.ok) {
 
-                    console.log(data.message);
-                    return;
+                console.log(data.message);
 
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/");
                 }
 
-
-                setNotes(data);
-
-
-            } catch (error) {
-
-                console.log("Error:", error);
-
+                return;
             }
 
-        };
+            setNotes(data);
 
+        } catch (error) {
 
-        getNotes();
+            console.log("Error:", error);
 
-    }, []);
+        }
+
+    };
+
+    getNotes();
+
+}, [navigate]);
 
 
     const createNote = () => {
@@ -87,12 +99,12 @@ const Home = () => {
     //     setNotes(filteredNotes)
     // }, [filter])
 
-    
+
 
     // useEffect(() => {
     //     console.log(sortBy)
     //     const sortedNotes = [...notes].sort((a, b) => {
-            
+
     //         if (sortBy === "alphabets") {
 
     //             return a.title.localeCompare(b.title);
@@ -120,34 +132,33 @@ const Home = () => {
 
 
 
-const displayNotes = [...notes]
-    .filter((note) =>
-        note.title.toLowerCase().includes(filter.toLowerCase()) ||
-        note.body.toLowerCase().includes(filter.toLowerCase())
-    )
-   .sort((a, b) => {
+    const displayNotes = [...notes]
+        .filter((note) =>
+            note.title.toLowerCase().includes(filter.toLowerCase()) ||
+            note.body.toLowerCase().includes(filter.toLowerCase())
+        )
+        .sort((a, b) => {
 
-    if (sortBy === "alphabets") {
-        return a.title.localeCompare(b.title);
-    }
+            if (sortBy === "alphabets") {
+                return a.title.localeCompare(b.title);
+            }
 
-    if (sortBy === "edited") {
-        return new Date(b.updatedAt) - new Date(a.updatedAt);
-    }
+            if (sortBy === "edited") {
+                return new Date(b.updatedAt) - new Date(a.updatedAt);
+            }
 
-    if (sortBy === "created") {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-    }
+            if (sortBy === "created") {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }
 
-    return 0;
-});
+            return 0;
+        });
 
 
     return (
 
         <div>
 
-            <Header />
             <Navbar
                 filter={filter}
                 setFilter={setFilter}

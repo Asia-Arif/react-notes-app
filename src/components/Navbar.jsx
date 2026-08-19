@@ -1,9 +1,38 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 const Navbar = ({ filter, setFilter, sortBy, setSortBy }) => {
 
-    return (
-        <nav className="bg-[#F7F7F7] flex justify-center py-[16px] gap-[40px] flex-wrap px-2">
+    const navigate = useNavigate();
 
-            <div>
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
+        }
+
+    }, []);
+
+    const logout = () => {
+
+        localStorage.removeItem("token");
+
+        setIsLoggedIn(false);
+
+        navigate("/");
+
+    };
+
+    return (
+       
+            <nav className="relative bg-[#F7F7F7] flex justify-center py-[16px] gap-[40px] flex-wrap px-2">
+
 
                 <input
                     type="text"
@@ -13,10 +42,8 @@ const Navbar = ({ filter, setFilter, sortBy, setSortBy }) => {
                     className="bg-white p-2"
                 />
 
-            </div>
 
 
-            <div>
 
                 <select
                     title="filter"
@@ -43,9 +70,17 @@ const Navbar = ({ filter, setFilter, sortBy, setSortBy }) => {
 
                 </select>
 
-            </div>
 
-        </nav>
+        {isLoggedIn && (
+                <button
+                    onClick={logout}
+                    className="bg-[#437993] absolute right-2 text-white px-4 py-2 rounded-[8px]   self-end cursor-pointer"
+                >
+                    Logout
+                </button>
+            )}
+                </nav>
+
     );
 };
 
