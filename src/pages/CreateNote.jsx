@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "../lib/config";
 import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 
 const CreateNote = () => {
 
@@ -37,7 +38,7 @@ const CreateNote = () => {
                     const data = await response.json();
 
                     if (!response.ok) {
-                        alert(data.message);
+                        toast.error(data.message);
                         return;
                     }
 
@@ -86,7 +87,7 @@ const CreateNote = () => {
 
             if (!response.ok) {
 
-                alert(data.message);
+                toast.error(data.message);
                 return;
 
             }
@@ -132,7 +133,7 @@ const CreateNote = () => {
 
             if (!response.ok) {
 
-                alert(data.message);
+                toast.error(data.message);
                 return;
 
             }
